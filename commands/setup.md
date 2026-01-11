@@ -10,4 +10,4 @@ description: Initialize AI routing settings for this project
 
 ## Next
 
-Use `/ai-architect:target` to change a category target, or `/ai-architect:implicit on|off` to toggle automatic routing.
+Use `/cc-architect:target` to change a category target, or `/cc-architect:implicit on|off` to toggle automatic routing.

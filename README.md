@@ -4,14 +4,14 @@ Routes planning, architecture, and review work through configurable AI CLIs and 
 
 ## What this plugin does
 
-- Adds slash commands for explicit provider calls: `/ai-architect:plan`, `/ai-architect:architecture`, `/ai-architect:review`.
+- Adds slash commands for explicit provider calls: `/cc-architect:plan`, `/cc-architect:architecture`, `/cc-architect:review`.
 - Adds a `UserPromptSubmit` hook that can implicitly route prompts to a provider.
 - Stores routing settings in `.claude/settings.json` under `aiArchitect`.
 
 ## Install for local testing
 
 ```bash
-claude --plugin-dir /home/codex/claude-plugin/ai-architect
+claude --plugin-dir /home/codex/claude-marketplace/ai-architect
 ```
 
 ## First-time setup
@@ -19,7 +19,7 @@ claude --plugin-dir /home/codex/claude-plugin/ai-architect
 Run:
 
 ```
-/ai-architect:setup
+/cc-architect:setup
 ```
 
 This creates or updates `.claude/settings.json` with defaults and prints a summary.
@@ -86,13 +86,13 @@ When `implicit` is `true`, the plugin uses a `UserPromptSubmit` hook to detect c
 
 ## Slash commands
 
-- `/ai-architect:setup` - initialize routing settings
-- `/ai-architect:targets` - show current routing summary
-- `/ai-architect:target [planning|architecture|review] [codex|gemini|claude|off]` - update a category target
-- `/ai-architect:implicit [on|off]` - toggle implicit routing
-- `/ai-architect:plan` - explicit planning guidance via configured provider
-- `/ai-architect:architecture` - explicit architecture guidance via configured provider
-- `/ai-architect:review` - explicit review guidance via configured provider
+- `/cc-architect:setup` - initialize routing settings
+- `/cc-architect:targets` - show current routing summary
+- `/cc-architect:target [planning|architecture|review] [codex|gemini|claude|off]` - update a category target
+- `/cc-architect:implicit [on|off]` - toggle implicit routing
+- `/cc-architect:plan` - explicit planning guidance via configured provider
+- `/cc-architect:architecture` - explicit architecture guidance via configured provider
+- `/cc-architect:review` - explicit review guidance via configured provider
 
 ## Notes
 
