@@ -1,0 +1,8 @@
+{
+  "name": "ai-architect",
+  "description": "Route planning, architecture, and review work through configurable AI CLIs",
+  "version": "0.2.0",
+  "author": {
+    "name": "Your Name"
+  }
+}

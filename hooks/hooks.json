@@ -1,0 +1,15 @@
+{
+  "description": "Route selected prompts through configured AI providers and inject results as context",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/ai_route.py"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,103 @@
+# AI Architect Plugin
+
+Routes planning, architecture, and review work through configurable AI CLIs and injects their output into Claude Code.
+
+## What this plugin does
+
+- Adds slash commands for explicit provider calls: `/ai-architect:plan`, `/ai-architect:architecture`, `/ai-architect:review`.
+- Adds a `UserPromptSubmit` hook that can implicitly route prompts to a provider.
+- Stores routing settings in `.claude/settings.json` under `aiArchitect`.
+
+## Install for local testing
+
+```bash
+claude --plugin-dir /home/codex/claude-plugin/ai-architect
+```
+
+## First-time setup
+
+Run:
+
+```
+/ai-architect:setup
+```
+
+This creates or updates `.claude/settings.json` with defaults and prints a summary.
+
+## Routing settings
+
+Stored in `.claude/settings.json`:
+
+```json
+{
+  "aiArchitect": {
+    "implicit": true,
+    "targets": {
+      "planning": "codex",
+      "architecture": "codex",
+      "review": "codex"
+    },
+    "providers": {
+      "codex": {
+        "kind": "codex",
+        "model": "gpt-5.2-codex",
+        "implicit": {
+          "sandbox": "read-only",
+          "approval": "never"
+        },
+        "explicit": {
+          "sandbox": "workspace-write",
+          "approval": "never"
+        }
+      },
+      "gemini": {
+        "kind": "gemini",
+        "model": "gemini-1.5-pro",
+        "implicit": {
+          "sandbox": true,
+          "approval_mode": "default"
+        },
+        "explicit": {
+          "sandbox": false,
+          "approval_mode": "auto_edit"
+        }
+      }
+    }
+  }
+}
+```
+
+### Categories
+
+- **Planning**: roadmaps, milestones, scope, requirements, sequencing.
+- **Architecture**: system design, components, data models, infra, stack choices.
+- **Review**: code review, audits, risks, refactor feedback.
+
+### Targets
+
+- `codex`: run Codex CLI and inject output.
+- `gemini`: run Gemini CLI and inject output.
+- `claude`: skip external provider and let Claude respond normally.
+- `off`: skip external provider and ignore the category.
+
+### Implicit routing
+
+When `implicit` is `true`, the plugin uses a `UserPromptSubmit` hook to detect category keywords and, if the target is `codex` or `gemini`, runs that provider automatically. The result is injected as context for Claude to summarize.
+
+## Slash commands
+
+- `/ai-architect:setup` - initialize routing settings
+- `/ai-architect:targets` - show current routing summary
+- `/ai-architect:target [planning|architecture|review] [codex|gemini|claude|off]` - update a category target
+- `/ai-architect:implicit [on|off]` - toggle implicit routing
+- `/ai-architect:plan` - explicit planning guidance via configured provider
+- `/ai-architect:architecture` - explicit architecture guidance via configured provider
+- `/ai-architect:review` - explicit review guidance via configured provider
+
+## Notes
+
+- Codex auth is managed by `codex login`. `codex login status` should show "Logged in using ChatGPT" or an API key login.
+- Gemini CLI is available at `/usr/local/bin/gemini`. Use `gemini --help` for its auth/config.
+- For Codex, `implicit.sandbox` accepts `read-only`, `workspace-write`, or `danger-full-access`.
+- For Gemini, `implicit.sandbox` is a boolean that maps to `--sandbox`, and `approval_mode` maps to `--approval-mode`.
+- Rename the plugin by changing the `name` field in `.claude-plugin/plugin.json` if you want a shorter slash command prefix.
