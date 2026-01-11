@@ -8,6 +8,9 @@ description: Configure roles and providers
 - Show current setup:
   - !`python3 ${CLAUDE_PLUGIN_ROOT}/scripts/ai_cli.py summary`
 
+- List roles:
+  - !`python3 ${CLAUDE_PLUGIN_ROOT}/scripts/ai_cli.py role list`
+
 - Add a role (kebab-case):
   - !`python3 ${CLAUDE_PLUGIN_ROOT}/scripts/ai_cli.py role add ui-dev --description "UI development focus"`
 
