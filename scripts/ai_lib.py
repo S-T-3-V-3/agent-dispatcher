@@ -132,14 +132,18 @@ def summarize_config(config: dict) -> str:
         model = provider.get("model")
         implicit_cfg = provider.get("implicit", {})
         explicit_cfg = provider.get("explicit", {})
-        if provider.get("kind") == "codex":
+        kind = provider.get("kind")
+        if kind == "codex":
             lines.append(
                 f"- {name} (codex, model={model}, implicit sandbox={implicit_cfg.get('sandbox')} approval={implicit_cfg.get('approval')}, explicit sandbox={explicit_cfg.get('sandbox')} approval={explicit_cfg.get('approval')})"
             )
-        elif provider.get("kind") == "gemini":
+        elif kind == "gemini":
             lines.append(
                 f"- {name} (gemini, model={model}, implicit sandbox={implicit_cfg.get('sandbox')} approval_mode={implicit_cfg.get('approval_mode')}, explicit sandbox={explicit_cfg.get('sandbox')} approval_mode={explicit_cfg.get('approval_mode')})"
             )
+        elif kind == "command":
+            command = provider.get("command")
+            lines.append(f"- {name} (command, command={command})")
         else:
             lines.append(f"- {name} (custom provider)")
     return "\n".join(lines)
@@ -232,6 +236,28 @@ def _run_gemini(prompt: str, root: Path, mode: str, provider: dict) -> tuple[int
     return result.returncode, stdout, (stderr or stdout)
 
 
+def _run_command_provider(prompt: str, root: Path, provider: dict) -> tuple[int, str, str]:
+    raw_command = provider.get("command")
+    if not raw_command:
+        return 1, "", "Missing command for provider."
+
+    if isinstance(raw_command, str):
+        command = raw_command.replace("{prompt}", prompt)
+        cmd = command if "{prompt}" in raw_command else f"{command} \"{prompt}\""
+        result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(root), shell=True)
+    else:
+        cmd_list = [str(item) for item in raw_command]
+        if "{prompt}" in cmd_list:
+            cmd_list = [prompt if item == "{prompt}" else item for item in cmd_list]
+        else:
+            cmd_list.append(prompt)
+        result = subprocess.run(cmd_list, capture_output=True, text=True, cwd=str(root))
+
+    stdout = result.stdout.strip()
+    stderr = result.stderr.strip()
+    return result.returncode, stdout, (stderr or stdout)
+
+
 def run_provider(provider_name: str, prompt: str, root: Path, mode: str, config: dict) -> tuple[int, str, str]:
     providers = config.get("providers", {})
     provider = providers.get(provider_name)
@@ -243,5 +269,7 @@ def run_provider(provider_name: str, prompt: str, root: Path, mode: str, config:
         return _run_codex(prompt, root, mode, provider)
     if kind == "gemini":
         return _run_gemini(prompt, root, mode, provider)
+    if kind == "command":
+        return _run_command_provider(prompt, root, provider)
 
     return 1, "", f"Unsupported provider kind: {kind}"
