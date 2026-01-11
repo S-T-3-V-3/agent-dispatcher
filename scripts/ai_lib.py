@@ -1,18 +1,35 @@
 #!/usr/bin/env python3
 import json
 import os
+import re
 from pathlib import Path
 
 CONFIG_KEY = "aiArchitect"
 
-ROLES = ("planning", "architect", "review", "qa")
+ROLE_NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 DEFAULT_CONFIG = {
     "roles": {
-        "planning": {"enabled": True, "provider": "claude"},
-        "architect": {"enabled": True, "provider": "claude"},
-        "review": {"enabled": True, "provider": "claude"},
-        "qa": {"enabled": True, "provider": "claude"},
+        "planning": {
+            "enabled": True,
+            "provider": "claude",
+            "description": "Planning and sequencing work",
+        },
+        "architect": {
+            "enabled": True,
+            "provider": "claude",
+            "description": "System design and architecture decisions",
+        },
+        "review": {
+            "enabled": True,
+            "provider": "claude",
+            "description": "Code and design reviews",
+        },
+        "qa": {
+            "enabled": True,
+            "provider": "claude",
+            "description": "Testing strategy and QA feedback",
+        },
     },
     "providers": {
         "claude": {
@@ -92,14 +109,17 @@ def summarize_config(config: dict) -> str:
     roles = config.get("roles", {})
     providers = config.get("providers", {})
     lines = ["Roles:"]
-    for role in ROLES:
+    for role in sorted(roles.keys()):
         role_cfg = roles.get(role, {})
         enabled = "on" if role_cfg.get("enabled", True) else "off"
         provider = role_cfg.get("provider", "claude")
-        lines.append(f"- {role}: {enabled} (provider: {provider})")
+        desc = role_cfg.get("description", "")
+        desc_suffix = f" - {desc}" if desc else ""
+        lines.append(f"- {role}: {enabled} (provider: {provider}){desc_suffix}")
 
     lines.append("Providers:")
-    for name, provider in providers.items():
+    for name in sorted(providers.keys()):
+        provider = providers.get(name, {})
         kind = provider.get("kind", "custom")
         model = provider.get("model")
         command = provider.get("command")
@@ -112,3 +132,7 @@ def summarize_config(config: dict) -> str:
         lines.append(f"- {name} ({kind}){details}")
 
     return "\n".join(lines)
+
+
+def validate_role_name(name: str) -> bool:
+    return bool(ROLE_NAME_RE.fullmatch(name or ""))
