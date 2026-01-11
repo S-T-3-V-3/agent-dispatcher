@@ -5,7 +5,7 @@ Configure AI roles and providers for Claude Code.
 ## What this plugin does
 
 - Stores role and provider settings in `.claude/settings.json` under `aiArchitect`.
-- Provides a single configuration command with non-interactive subcommands.
+- Provides a single configuration command that prints a fast numbered menu.
 - Statusline is enabled by default and shows enabled roles/providers.
 
 ## Install for local testing
@@ -22,7 +22,11 @@ Run:
 /cc-distribution:config
 ```
 
-This prints usage examples for managing roles and providers.
+Then run a menu command, for example:
+
+```
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/ai_cli.py menu roles
+```
 
 ## Statusline format
 
@@ -50,14 +54,14 @@ Each role can be enabled/disabled and assigned to a provider. Role names must be
 - `gemini`
 - custom command providers
 
-## Auth options (shown in the config output)
+## Auth options (shown in the help menu)
 
 - Codex: `codex login`, `codex login --device-auth`, or `printenv OPENAI_API_KEY | codex login --with-api-key`.
 - Gemini: Google OAuth login via `gemini`, API key via `GEMINI_API_KEY`, or Vertex AI via `GOOGLE_API_KEY` + `GOOGLE_GENAI_USE_VERTEXAI=true`.
 
 ## Slash commands
 
-- `/cc-distribution:config` - configuration and subcommand examples
+- `/cc-distribution:config` - show the fast menu and usage
 
 ## Disable statusline
 

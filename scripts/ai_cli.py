@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+from pathlib import Path
 
 from ai_lib import load_config, project_root, save_config, summarize_config, validate_role_name
 
@@ -143,6 +144,50 @@ def _print_auth_help() -> None:
     print("- Vertex AI: export GOOGLE_API_KEY=... and GOOGLE_GENAI_USE_VERTEXAI=true")
 
 
+def _menu_path(name: str) -> Path:
+    return Path(__file__).resolve().parent.parent / "menu" / f"{name}.md"
+
+
+def _print_menu_file(name: str) -> None:
+    path = _menu_path(name)
+    try:
+        text = path.read_text(encoding="utf-8").rstrip()
+    except OSError:
+        text = f"== {name.title()} ==\n(missing menu template)\n=========="
+    print(text)
+
+
+def _print_roles_list(config: dict) -> None:
+    roles = config.get("roles", {})
+    if not roles:
+        print("1. (no roles configured)")
+        return
+    for idx, (role, role_cfg) in enumerate(sorted(roles.items()), start=1):
+        enabled = "on" if role_cfg.get("enabled", True) else "off"
+        provider = role_cfg.get("provider", "claude")
+        desc = role_cfg.get("description", "")
+        suffix = f" - {desc}" if desc else ""
+        print(f\"{idx}. {role} [{enabled}] ({provider}){suffix}\")
+
+
+def _print_providers_list(config: dict) -> None:
+    providers = config.get("providers", {})
+    if not providers:
+        print("1. (no providers configured)")
+        return
+    for idx, (name, provider) in enumerate(sorted(providers.items()), start=1):
+        kind = provider.get("kind", "custom")
+        model = provider.get("model")
+        command = provider.get("command")
+        extras = []
+        if model:
+            extras.append(f\"model={model}\")
+        if command:
+            extras.append(f\"command={command}\")
+        extra_text = f\"; {', '.join(extras)}\" if extras else \"\"
+        print(f\"{idx}. {name} ({kind}{extra_text})\")
+
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Manage AI routing settings")
@@ -150,6 +195,8 @@ def parse_args() -> argparse.Namespace:
 
     sub.add_parser("summary", help="Show current routing configuration")
     sub.add_parser("auth-help", help="Show authentication guidance for providers")
+    menu = sub.add_parser("menu", help="Show a fast menu")
+    menu.add_argument("section", choices=("main", "help", "roles", "providers", "settings"))
 
     role = sub.add_parser("role", help="Manage roles")
     role_sub = role.add_subparsers(dest="role_cmd", required=True)
@@ -212,6 +259,14 @@ def main() -> int:
 
     if args.command == "auth-help":
         _print_auth_help()
+        return 0
+
+    if args.command == "menu":
+        _print_menu_file(args.section)
+        if args.section == "roles":
+            _print_roles_list(config)
+        elif args.section == "providers":
+            _print_providers_list(config)
         return 0
 
     if args.command == "role":
