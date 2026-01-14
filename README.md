@@ -5,7 +5,6 @@ Configure AI roles and providers for Claude Code.
 ## What this plugin does
 
 - Stores role and provider settings in `.claude/settings.json` under `agentDispatcher`.
-- Stores role and provider settings in `.claude/settings.json` under `agentDispatcher`.
 - Provides `setup` and `settings` commands for project configuration and management.
 - Statusline is optional and shows enabled roles/providers when enabled.
 
