@@ -1,0 +1,6 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bash -lc 'plugin_dir=\"${CLAUDE_PLUGIN_ROOT:-}\"; if [ -z \"$plugin_dir\" ]; then exit 0; fi; \"/home/codex/.nvm/versions/node/v24.11.1/bin/node\" \"${plugin_dir}scripts/statusline/statusline.js\" # ai-architect-statusline'"
+  }
+}

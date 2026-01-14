@@ -31,7 +31,7 @@ try {
   settings = {};
 }
 
-const config = settings.aiArchitect || {};
+const config = settings.agentDispatcher || {};
 const roles = config.roles || {};
 
 const entries = Object.entries(roles)

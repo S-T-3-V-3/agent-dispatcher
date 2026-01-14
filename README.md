@@ -1,17 +1,17 @@
-# AI Architect Plugin
+# Agent Dispatcher Plugin
 
 Configure AI roles and providers for Claude Code.
 
 ## What this plugin does
 
-- Stores role and provider settings in `.claude/settings.json` under `aiArchitect`.
+- Stores role and provider settings in `.claude/settings.json` under `agentDispatcher`.
 - Provides a single configuration command that shows a fast menu.
 - Statusline is optional and shows enabled roles/providers when enabled.
 
 ## Install for local testing
 
 ```bash
-claude --plugin-dir /home/codex/claude-marketplace/ai-architect
+claude --plugin-dir /home/codex/claude-marketplace/agent-dispatcher
 ```
 
 ## Configuration
@@ -19,7 +19,7 @@ claude --plugin-dir /home/codex/claude-marketplace/ai-architect
 Run:
 
 ```
-/cc-distribution:config
+/agent-dispatcher:config
 ```
 
 The command runs an interactive menu. It can also be used for first-time setup.
@@ -65,7 +65,7 @@ Each role can be enabled/disabled and assigned to a provider. Role names must be
 
 ## Slash commands
 
-- `/cc-distribution:config` - show the fast menu
+- `/agent-dispatcher:config` - show the interactive menu
 
 ## Statusline toggle
 

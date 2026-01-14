@@ -3,8 +3,8 @@ const fs = require("fs");
 const path = require("path");
 
 const MARKETPLACE_NAME = "cc-marketplace";
-const PLUGIN_NAME = "cc-distribution";
-const MARKER = "ai-architect-statusline";
+const PLUGIN_NAME = "agent-dispatcher";
+const MARKER = "agent-dispatcher-statusline";
 
 const action = (process.argv[2] || "enable").toLowerCase();
 const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
@@ -53,7 +53,7 @@ if (action === "disable") {
     if (hasMarker || hasAggressive || hasBasic) {
       // Remove our command and any surrounding separators
       // We use a combined regex for replacement
-      const removeRegex = /bash\s+-lc\s+'[^']*(?:#\s*ai-architect-statusline|ls\s+-td[^']*cc-distribution|scripts\/statusline\/statusline\.js)[^']*'/g;
+      const removeRegex = /bash\s+-lc\s+'[^']*(?:#\s*agent-dispatcher-statusline|ls\s+-td[^']*cc-distribution|scripts\/statusline\/statusline\.js)[^']*'/g;
       let newCommand = currentCommand.replace(removeRegex, ' ; ').trim();
 
       // Clean up multiple separators or leading/trailing separators
