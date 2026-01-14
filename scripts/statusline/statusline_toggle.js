@@ -28,7 +28,7 @@ const buildStatuslineCommand = () => {
     'plugin_dir="${CLAUDE_PLUGIN_ROOT:-}"',
     `if [ -z "$plugin_dir" ]; then plugin_dir=$(ls -td ~/.claude/plugins/cache/${MARKETPLACE_NAME}/${PLUGIN_NAME}/*/ 2>/dev/null | head -1); fi`,
     'if [ -z "$plugin_dir" ]; then exit 0; fi',
-    `"${nodePath}" "\${plugin_dir}scripts/statusline.js"`,
+    `"${nodePath}" "\${plugin_dir}scripts/statusline/statusline.js"`,
   ].join("; ");
 
   return `bash -lc '${bash}'`;

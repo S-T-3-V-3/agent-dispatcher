@@ -72,6 +72,6 @@ Each role can be enabled/disabled and assigned to a provider. Role names must be
 Enable or disable per project:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/statusline_toggle.js" enable
-node "${CLAUDE_PLUGIN_ROOT}/scripts/statusline_toggle.js" disable
+node "${CLAUDE_PLUGIN_ROOT}/scripts/statusline/statusline_toggle.js" enable
+node "${CLAUDE_PLUGIN_ROOT}/scripts/statusline/statusline_toggle.js" disable
 ```

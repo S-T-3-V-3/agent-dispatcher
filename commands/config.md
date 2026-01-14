@@ -23,12 +23,10 @@ First-time setup:
 - If yes, ask whether to enable the statusline for this project.
 - If the user agrees, run:
 
-```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/statusline_toggle.js" enable
-```
+node "${CLAUDE_PLUGIN_ROOT}/scripts/statusline/statusline_toggle.js" enable
 
 If the user wants to disable the statusline later, run:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/statusline_toggle.js" disable
+node "${CLAUDE_PLUGIN_ROOT}/scripts/statusline/statusline_toggle.js" disable
 ```
