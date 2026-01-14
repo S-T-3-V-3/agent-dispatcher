@@ -4,7 +4,7 @@ const path = require("path");
 
 const MARKETPLACE_NAME = "cc-marketplace";
 const PLUGIN_NAME = "agent-dispatcher";
-const MARKER = "agent-dispatcher-statusline";
+const MARKER = `${PLUGIN_NAME}-statusline`;
 
 const action = (process.argv[2] || "enable").toLowerCase();
 const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
@@ -36,28 +36,41 @@ const buildOurCommand = () => {
 
 const settings = readSettings();
 const ourCommand = buildOurCommand();
-// Robust regex to find our command block: bash -lc '... # MARKER'
+
+// Precision regexes - MUST include the PLUGIN_NAME or MARKER to avoid stomping others
 const markerRegex = new RegExp(`bash\\s+-lc\\s+'[^']*#\\s*${MARKER}[^']*'`, 'g');
-// Extemely aggressive legacy regex: matches anything that looks like our old persistence logic
-const aggressiveLegacyRegex = /bash\s+-lc\s+'[^']*ls\s+-td[^']*agent-dispatcher[^']*'/g;
-// Fallback legacy regex for basic script calls
-const basicLegacyRegex = /bash\s+-lc\s+'[^']*scripts\/statusline\/statusline\.js[^']*'/g;
+const legacyRegex = new RegExp(`bash\\s+-lc\\s+'[^']*${PLUGIN_NAME}[^']*scripts/statusline/statusline\\.js[^']*'`, 'g');
+
+const removeOurCommand = (currentCommand) => {
+  // Use specific patterns for THIS plugin
+  const patterns = [
+    new RegExp(`\\s*(?:;|&&|\\\\n)?\\s*bash\\s+-lc\\s+'[^']*#\\s*${MARKER}[^']*'\\s*(?:;|&&|\\\\n)?`, 'g'),
+    new RegExp(`\\s*(?:;|&&|\\\\n)?\\s*bash\\s+-lc\\s+'[^']*${PLUGIN_NAME}[^']*scripts/statusline/statusline\\.js[^']*'\\s*(?:;|&&|\\\\n)?`, 'g')
+  ];
+
+  let newCommand = currentCommand;
+  for (const pattern of patterns) {
+    newCommand = newCommand.replace(pattern, ' ; ');
+  }
+
+  // Clean up: multiple separators, leading/trailing separators, and normalize to the user's preferred separator
+  // We'll normalize to " ; " for standard spacing, or " \n " if they wanted columns
+  newCommand = newCommand.trim()
+    .replace(/^\s*[;&]+\s*/, '')
+    .replace(/\s*[;&]+\s*$/, '')
+    .replace(/\s*[;&]+\s*[;&]+\s*/g, ' ; ');
+
+  return newCommand;
+};
 
 if (action === "disable") {
   if (settings.statusLine && settings.statusLine.command) {
     const currentCommand = settings.statusLine.command;
     const hasMarker = markerRegex.test(currentCommand);
-    const hasAggressive = aggressiveLegacyRegex.test(currentCommand);
-    const hasBasic = basicLegacyRegex.test(currentCommand);
+    const hasLegacy = legacyRegex.test(currentCommand);
 
-    if (hasMarker || hasAggressive || hasBasic) {
-      // Remove our command and any surrounding separators
-      // We use a combined regex for replacement
-      const removeRegex = /bash\s+-lc\s+'[^']*(?:#\s*agent-dispatcher-statusline|ls\s+-td[^']*agent-dispatcher|scripts\/statusline\/statusline\.js)[^']*'/g;
-      let newCommand = currentCommand.replace(removeRegex, ' ; ').trim();
-
-      // Clean up multiple separators or leading/trailing separators
-      newCommand = newCommand.replace(/^\s*[;&]+\s*/, '').replace(/\s*[;&]+\s*$/, '').replace(/\s*[;&]+\s*[;&]+\s*/g, ' ; ');
+    if (hasMarker || hasLegacy) {
+      const newCommand = removeOurCommand(currentCommand);
 
       if (newCommand === "") {
         delete settings.statusLine;
@@ -65,9 +78,9 @@ if (action === "disable") {
         settings.statusLine.command = newCommand;
       }
       writeSettings(settings);
-      process.stdout.write("Statusline disabled for this project.\n");
+      process.stdout.write(`Statusline for ${PLUGIN_NAME} disabled for this project.\n`);
     } else {
-      process.stdout.write("Statusline was not enabled by this plugin.\n");
+      process.stdout.write(`Statusline for ${PLUGIN_NAME} was not enabled.\n`);
     }
   } else {
     process.stdout.write("Statusline was not enabled.\n");
@@ -83,26 +96,29 @@ if (!settings.statusLine) {
   };
 } else if (settings.statusLine.type === "command") {
   let currentCommand = settings.statusLine.command || "";
+
   if (markerRegex.test(currentCommand)) {
-    // Replace existing version
+    // Replace existing version of our command
     settings.statusLine.command = currentCommand.replace(markerRegex, ourCommand);
-  } else if (aggressiveLegacyRegex.test(currentCommand)) {
-    // Replace aggressive legacy version
-    settings.statusLine.command = currentCommand.replace(aggressiveLegacyRegex, ourCommand);
-  } else if (basicLegacyRegex.test(currentCommand)) {
-    // Replace basic legacy version
-    settings.statusLine.command = currentCommand.replace(basicLegacyRegex, ourCommand);
+  } else if (legacyRegex.test(currentCommand)) {
+    // Replace legacy version of our command
+    settings.statusLine.command = currentCommand.replace(legacyRegex, ourCommand);
   } else {
-    // Append our command
-    settings.statusLine.command = currentCommand ? `${currentCommand} ; ${ourCommand}` : ourCommand;
+    // Append our command safely. 
+    // We'll use " ; " as a default, but if someone wants it on a "different line" 
+    // they might prefer " \n " if Claude supports it. 
+    // For now, let's stick to " ; " but make it easy to change.
+    const separator = " ; ";
+    settings.statusLine.command = currentCommand ? `${currentCommand}${separator}${ourCommand}` : ourCommand;
   }
 } else {
-  // If it's type 'text', we override
+  // If it's type 'text', we append or wrap
+  const existingText = settings.statusLine.value || "";
   settings.statusLine = {
     type: "command",
-    command: ourCommand,
+    command: existingText ? `echo "${existingText}" ; ${ourCommand}` : ourCommand,
   };
 }
 
 writeSettings(settings);
-process.stdout.write("Statusline enabled for this project.\n");
+process.stdout.write(`Statusline for ${PLUGIN_NAME} enabled for this project.\n`);
