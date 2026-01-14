@@ -5,7 +5,8 @@ Configure AI roles and providers for Claude Code.
 ## What this plugin does
 
 - Stores role and provider settings in `.claude/settings.json` under `agentDispatcher`.
-- Provides a single configuration command that shows a fast menu.
+- Stores role and provider settings in `.claude/settings.json` under `agentDispatcher`.
+- Provides `setup` and `settings` commands for project configuration and management.
 - Statusline is optional and shows enabled roles/providers when enabled.
 
 ## Install for local testing
@@ -19,18 +20,18 @@ claude --plugin-dir /home/codex/claude-marketplace/agent-dispatcher
 Run:
 
 ```
-/agent-dispatcher:config
+/agent-dispatcher:setup
 ```
 
-The command runs an interactive menu. It can also be used for first-time setup.
+This command helps with first-time project configuration, such as enabling the statusline.
 
-Menu files:
+For ongoing management, run:
 
-- `menu/main.md`
-- `menu/help.md`
-- `menu/roles.md`
-- `menu/providers.md`
-- `menu/settings.md`
+```
+/agent-dispatcher:settings
+```
+
+This command allows you to view providers, roles, and toggle the statusline.
 
 ## Statusline format
 
@@ -65,7 +66,8 @@ Each role can be enabled/disabled and assigned to a provider. Role names must be
 
 ## Slash commands
 
-- `/agent-dispatcher:config` - show the interactive menu
+- `/agent-dispatcher:setup` - first-time project configuration
+- `/agent-dispatcher:settings` - manage providers, roles, and statusline
 
 ## Statusline toggle
 
